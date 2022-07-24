@@ -1,3 +1,5 @@
+let currentTrade={};
+let currentSelectSide;
 async function init(){
     await listAvailableTokens();
 }
@@ -16,9 +18,29 @@ async function listAvailableTokens() {
         `<img class="token_list_img" src="${tokens[i].logoURI}">
         <span class="token_list_text">${tokens[i].symbol}</span>1`;
         div.innerHTML=html;
+        div.onclick=()=>{
+            selectToken(tokens[i]);
+        }
         parent.appendChild(div);
     }
 
+}
+function selectToken(token){
+    closeModal();
+    currentTrade[currentSelectSide]=token;
+    console.log("current trade:",currentTrade);
+    renderInterface();
+}
+function renderInterface() {
+    if(currentTrade.from){
+        document.getElementById("from_token_img").src=currentTrade.from.logoURI;
+        document.getElementById("from_token_text").innerHTML=currentTrade.from.symbol;
+
+    }
+    if(currentTrade.to){
+        document.getElementById("to_token_img").src=currentTrade.to.logoURI;
+        document.getElementById("to_token_text").innerHTML=currentTrade.to.symbol;
+    }
 }
 async function connect(){
     if(typeof window.ethereum !== "undefined"){
@@ -35,7 +57,8 @@ async function connect(){
         document.getElementById("login_button").innerHTML = "Pls Install MetaMask";
     }
 }
-function openModal() {
+function openModal(side) {
+    currentSelectSide=side;
     document.getElementById("token_modal").style.display="block";
 }
 function closeModal() {
@@ -43,5 +66,7 @@ function closeModal() {
 }
 init();
 document.getElementById("login_button").onclick=connect;
-document.getElementById("from_token_select").onclick = openModal;
+document.getElementById("from_token_select").onclick =() =>{ openModal("from");};
+document.getElementById("to_token_select").onclick =() =>{ openModal("to");};
 document.getElementById("modal_close").onclick=closeModal;
+document.getElementById("from_amount").onblur=getPrice;
