@@ -1,3 +1,4 @@
+const  qs = require('qs');
 let currentTrade={};
 let currentSelectSide;
 async function init(){
@@ -64,7 +65,24 @@ function openModal(side) {
 function closeModal() {
     document.getElementById("token_modal").style.display="none";
 }
+async function getPrice(){
+    if (!currentTrade.from || !currentTrade.to || !document.getElementById("from_amount").value) return;
+    let  amount = Number(document.getElementById("from_amount").value * 10 ** currentTrade.from.decimals);
+    const params = {
+        sellToken: currentTrade.from.address,
+        buyToken: currentTrade.to.address,
+        sellAmount: amount,
+      }
+      const response = await fetch(
+        `https://api.0x.org/swap/v1/price?${qs.stringify(params)}`
+        );
+        swapPriceJSON = await  response.json();
+	console.log("Price: ", swapPriceJSON);  
+    document.getElementById("to_amount").value=swapPriceJSON.buyAmount/(10 ** currentTrade.to.decimals);
+    document.getElementById("gas_estimate").innerHTML= swapPriceJSON.estimatedGas;
+}
 init();
+
 document.getElementById("login_button").onclick=connect;
 document.getElementById("from_token_select").onclick =() =>{ openModal("from");};
 document.getElementById("to_token_select").onclick =() =>{ openModal("to");};
