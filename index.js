@@ -316,13 +316,16 @@ async function trySwap() {
   ];
   // Set up approval amount for the token we want to trade from
   const fromTokenAddress = currentTrade.from.address;
+  let approval_amount = Number(
+    document.getElementById("from_amount").value *
+      10 ** currentTrade.from.decimals
+  );
+  
   const web3 = new Web3(Web3.givenProvider);
   const ERC20TokenContract = new web3.eth.Contract(erc20abi, fromTokenAddress);
   console.log("setup ERC20TokenContract: ", ERC20TokenContract);
-  const maxApproval = new BigNumber(2).pow(256).minus(1);
-  console.log("approval amount: ", maxApproval);
   const tx = await ERC20TokenContract.methods
-    .approve(swapQuoteJSON.allowanceTarget, maxApproval)
+    .approve(swapQuoteJSON.allowanceTarget, approval_amount)
     .send({ from: takerAddress })
     .then((tx) => {
       console.log("tx: ", tx);
